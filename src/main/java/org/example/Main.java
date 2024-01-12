@@ -8,6 +8,8 @@ public class Main {
         // to see how IntelliJ IDEA suggests fixing it.
         System.out.printf("Hello and welcome! \n");
 
-        Generator.GenerateSudoku();
+        Generator generator = new Generator();
+        generator.GenerateSudoku();
+        System.out.print(generator.toString());
     }
 }
