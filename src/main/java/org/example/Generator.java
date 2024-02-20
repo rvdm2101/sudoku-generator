@@ -2,12 +2,8 @@ package org.example;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Generator {
     private static String HorizontalDivider = "|";
@@ -27,44 +23,130 @@ public class Generator {
      */
     private List<List<Number>> sudokuGrid;
 
-    private List<List<Number>> GenerateSudokuGrid() {
+    /**
+     * Create a sudoku tile. All positions are filled with the value 'NULL'.
+     * The array represents a sudoku 3x3 tile
+     */
+    private List<Number> generateSudokTile() {
+        List<Number> tile = new ArrayList<Number>();
+        for (int cellIndex = 0; cellIndex <= 8; cellIndex++) {
+            tile.add(null);
+        }
+        return tile;
+    }
+
+    /**
+     * Create a sudoku grid with a 9 by 9 multidemential array. All array positions are filled with the value 'NULL'.
+     * Each array represents a sudoku 3x3 tile
+     */
+    private List<List<Number>> generateSudokuGrid() {
         List<List<Number>> grid = new ArrayList<>();
-        for (int rowIndex = 0; rowIndex <= 8; rowIndex++) {
-            grid.add(new ArrayList<Number>());
-            for (int columnIndex = 0; columnIndex <= 8; columnIndex++) {
-                grid.get(rowIndex).add(null);
-            }
+        for (int tileIndex = 0; tileIndex <= 8; tileIndex++) {
+            grid.add(generateSudokTile());
         }
         return grid;
     }
 
-    /**
-     * Initialze the sudoku grid with a 9 by 9 multidemential array. All array positions are filled with the value 'NULL'
-     */
-    private void InitialzeSudokuGrid() {
-        sudokuGrid = GenerateSudokuGrid();
+    private List<List<Number>> findAvailableTileArrangements(
+        List<List<Number>> tilesHorizontaly,
+        List<List<Number>> tilesVerticaly
+    ) {
+        List<Number> availableTileArrangements = generateSudokTile();
+        for (int index = 0; index < tilesHorizontaly.size(); index++) {
+        }
+
+        return null;
     }
 
-    public void GenerateSudoku() {
-        InitialzeSudokuGrid();
+    private enum Orientation {
+        HORIZONTAL,
+        VERTICAL
+    }
 
-        // 1. Get current number
-        // 2. Get available places per row
-        Random random = new Random();
-        int number = 1;
-        List<Number> availableChoices = new LinkedList<Number>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8));
+    /**
+     * Get the existingTiles for a specific row or column
+     * 
+     * @param currentTileIndex the index of the current tile
+     * @param sudokuGrid the current filled in sudokuGrid
+     * @param orientation get the tiles for a row or column
+     * 
+     * @return the filled in tiles in the current row or column
+     */
+    private List<List<Number>> getExistingTiles(int currentTileIndex, List<List<Number>> sudokuGrid, Orientation orientation) {
+        List<List<Number>> existingTiles = new ArrayList<>();
+        if (orientation == Orientation.HORIZONTAL) {
+            // Determine which row the currentTileIndex is for
+            int rowIndex = (int) Math.floor(currentTileIndex / TilesPerRow);
+            // rowIndex 0 > tiles 0,1,2
+            // rowIndex 1 > tiles 3,4,5
+            // rowIndex 2 > tiles 6,7,8
+            
+            // Get the other tiles in that row
+            int firstTileIndex = rowIndex * TilesPerRow;
+            int[] indexes = {firstTileIndex, firstTileIndex + 1, firstTileIndex + 2};
 
-        for (int rowIndex = 0; rowIndex <= 8; rowIndex++) {
-            // List<Number> availableColumns = GetAvailableRowColumns(sudokuGrid.get(rowIndex));
-            // List<Number> intersectedColumns = Intersection(availableColumns, availableChoices);
-
-            int randomIndex = random.nextInt(availableChoices.size());
-            int chosenIndex = availableChoices.get(randomIndex).intValue();
-
-            // Place the number in the sudoku grid, and remove the position from the available list
-            sudokuGrid.get(rowIndex).add(chosenIndex, number);
-            availableChoices.remove(randomIndex);
+            // Get the filled in tiles in that row
+            for (int index : indexes) {
+                if (index == currentTileIndex || index >= sudokuGrid.size()) {
+                    continue;
+                }
+                existingTiles.add(sudokuGrid.get(index));
+            }
+            return existingTiles;
         }
+
+        return existingTiles;
+    }
+
+    private List<Number> getTileArrangement(int tileIndex, List<List<Number>> sudokuGrid) {
+        // Create the first tile of the sudoku grid
+        if (tileIndex == 0) {
+            List<Number> newTile = new LinkedList<Number>(Arrays.asList(1,2,3,4,5,6,7,8,9));
+            // TODO: Add the following line, to make the first tile in random order
+            // Collections.shuffle(newTile);
+            return newTile;
+        }
+
+        // Get the horizontal and vertical tiles, that are relevant for the current tile index
+        // (so get the tiles directly next to the current tileIndex)
+        List<List<Number>> horizontalTiles = getExistingTiles(tileIndex, sudokuGrid, Orientation.HORIZONTAL);
+        List<List<Number>> verticalTiles = getExistingTiles(tileIndex, sudokuGrid, Orientation.VERTICAL);
+        System.out.println(horizontalTiles);
+
+        List<List<Number>> availableTileArrangement = findAvailableTileArrangements(horizontalTiles, verticalTiles);
+        // if (availableTileArrangement == null) {
+        // }
+        // return availableTileArrangement;
+        // Something went wrong, return empty sudoku tile
+        return new LinkedList<Number>(Arrays.asList(null,null,null,null,null,null,null,null,null));
+    }
+
+    public void generateSudoku() {
+        sudokuGrid = new ArrayList<>();
+
+        for (int tileIndex = 0; tileIndex < 9; tileIndex++) {
+            List<Number> tileArrangement = getTileArrangement(tileIndex, sudokuGrid);
+            sudokuGrid.add(tileIndex, tileArrangement);
+        }
+
+
+        // // 1. Get current number
+        // // 2. Get available places per row
+        // Random random = new Random();
+        // int number = 1;
+        // List<Number> availableChoices = new LinkedList<Number>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8));
+
+        // for (int rowIndex = 0; rowIndex <= 8; rowIndex++) {
+        //     // List<Number> availableColumns = GetAvailableRowColumns(sudokuGrid.get(rowIndex));
+        //     // List<Number> intersectedColumns = Intersection(availableColumns, availableChoices);
+
+        //     int randomIndex = random.nextInt(availableChoices.size());
+        //     int chosenIndex = availableChoices.get(randomIndex).intValue();
+
+        //     // Place the number in the sudoku grid, and remove the position from the available list
+        //     sudokuGrid.get(rowIndex).add(chosenIndex, number);
+        //     availableChoices.remove(randomIndex);
+        // }
     }
 
     private boolean shouldAppendDivider(int index) {
@@ -74,7 +156,7 @@ public class Generator {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        List<List<Number>> rowsList = GenerateSudokuGrid();
+        List<List<Number>> rowsList = generateSudokuGrid();
 
         for (int tileIndex = 0; tileIndex < sudokuGrid.size(); tileIndex++) {
             List<Number> tile = sudokuGrid.get(tileIndex);
@@ -88,17 +170,8 @@ public class Generator {
             // tileIndex 1,4,7 => tileColumn 1
             // tileIndex 2,5,8 => tileColumn 2
 
-            // tile 0 => array 0,1,2. Positions 0,1,2.
-            // tile 1 => array 0,1,2. Positions 3,4,5.
-            // tile 2 => array 0,1,2. Positions 6,7,8.
-            // tile 3 => array 3,4,5. Positions 0,1,2.
-
             for (int rowLineIndex = tileRow * TilesPerRow; rowLineIndex < (tileRow + 1) * TilesPerRow; rowLineIndex++) {
-
-                System.out.println(rowLineIndex);
-                System.out.println(rowLineIndex * TilesPerRow);
                 for (int columnLineIndex = tileColumn * TilesPerColumn; columnLineIndex < (tileColumn + 1) * TilesPerColumn; columnLineIndex++) {
-                    // rowsList.get(rowLineIndex).add(columnLineIndex, tile.get((rowLineIndex * TilesPerRow) + columnLineIndex));
                     rowsList.get(rowLineIndex).add(columnLineIndex, tile.get(index));
                     index++;
                 }

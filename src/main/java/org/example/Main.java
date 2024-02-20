@@ -9,7 +9,7 @@ public class Main {
         System.out.printf("Hello and welcome! \n");
 
         Generator generator = new Generator();
-        generator.GenerateSudoku();
+        generator.generateSudoku();
         System.out.print(generator.toString());
     }
 }
