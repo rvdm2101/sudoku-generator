@@ -75,7 +75,7 @@ public class Generator {
     private List<List<Number>> getExistingTiles(int currentTileIndex, List<List<Number>> sudokuGrid, Orientation orientation) {
         List<List<Number>> existingTiles = new ArrayList<>();
         if (orientation == Orientation.HORIZONTAL) {
-            // Determine which row the currentTileIndex is for
+            // Determine in which row the currentTileIndex will be placed
             int rowIndex = (int) Math.floor(currentTileIndex / TilesPerRow);
             // rowIndex 0 > tiles 0,1,2
             // rowIndex 1 > tiles 3,4,5
@@ -95,6 +95,23 @@ public class Generator {
             return existingTiles;
         }
 
+        // Determine in which column the currentTileIndex will be placed
+        int columnIndex = currentTileIndex % TilesPerColumn;
+        // columnIndex 0 > tiles 0,3,6
+        // columnIndex 1 > tiles 1,4,7
+        // columnIndex 2 > tiles 2,5,8
+
+        // Get the other tiles in that column
+        int[] indexes = {columnIndex, columnIndex + TilesPerColumn, columnIndex + (TilesPerColumn * 2)};
+
+        // Get the filled in tiles in that row
+        for (int index : indexes) {
+            if (index == currentTileIndex || index >= sudokuGrid.size()) {
+                continue;
+            }
+            existingTiles.add(sudokuGrid.get(index));
+        }
+
         return existingTiles;
     }
 
@@ -111,7 +128,6 @@ public class Generator {
         // (so get the tiles directly next to the current tileIndex)
         List<List<Number>> horizontalTiles = getExistingTiles(tileIndex, sudokuGrid, Orientation.HORIZONTAL);
         List<List<Number>> verticalTiles = getExistingTiles(tileIndex, sudokuGrid, Orientation.VERTICAL);
-        System.out.println(horizontalTiles);
 
         List<List<Number>> availableTileArrangement = findAvailableTileArrangements(horizontalTiles, verticalTiles);
         // if (availableTileArrangement == null) {
