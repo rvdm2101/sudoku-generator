@@ -66,7 +66,11 @@ public class Generator {
         return Arrays.asList(tile.get(firstTileIndex), tile.get(firstTileIndex + 1), tile.get(firstTileIndex + 2));
     }
 
-    private void removeNumbersFromAvailableTileArrangements(
+    private List<Number> getNumbersFromColumnIndex(Integer columnIndex, List<Number> tile) {
+        return Arrays.asList(tile.get(columnIndex), tile.get(columnIndex + TilesPerColumn), tile.get(columnIndex + (TilesPerColumn * 2)));
+    }
+
+    private void removeNumbersInARowFromAvailableTileArrangements(
         Integer rowIndex,
         List<Number> numbersToRemove,
         List<List<Number>> AvailableTileArrangements
@@ -80,16 +84,29 @@ public class Generator {
         }
     }
 
+    private void removeNumbersInAColumnFromAvailableTileArrangements(
+        Integer columnIndex,
+        List<Number> numbersToRemove,
+        List<List<Number>> AvailableTileArrangements
+    ) {
+        int[] indexes = {columnIndex, columnIndex + TilesPerColumn, columnIndex + (TilesPerColumn * 2)};
+
+        for (int index : indexes) {
+            AvailableTileArrangements.get(index).removeAll(numbersToRemove);
+        }
+    }
+
     private List<List<Number>> findAvailableTileArrangements(
         List<List<Number>> horizontalTiles,
         List<List<Number>> verticalTiles
     ) {
         // Generate a prefilled tile
         List<List<Number>> availableTileArrangements = generateSudokuGrid(1,2,3,4,5,6,7,8,9);
+
         // Remove all the numbers already used in other tiles next to this tile
         for (int index = 0; index < horizontalTiles.size(); index++) {
             for (int rowIndex = 0; rowIndex <= 2; rowIndex++) {
-                removeNumbersFromAvailableTileArrangements(
+                removeNumbersInARowFromAvailableTileArrangements(
                     rowIndex,
                     getNumbersFromRowIndex(rowIndex, horizontalTiles.get(index)),
                     availableTileArrangements
@@ -97,9 +114,18 @@ public class Generator {
             }
         }
 
-        // TODO: Remove all the numbers already used in other tiles above or below this tile
+        // Remove all the numbers already used in other tiles above and below this tile
+        for (int index = 0; index < verticalTiles.size(); index++) {
+            for (int columnIndex = 0; columnIndex <= 2; columnIndex++) {
+                removeNumbersInAColumnFromAvailableTileArrangements(
+                    columnIndex,
+                    getNumbersFromColumnIndex(columnIndex, verticalTiles.get(index)),
+                    availableTileArrangements
+                );
+            }
+        }
 
-        return null;
+        return availableTileArrangements;
     }
 
     /**
