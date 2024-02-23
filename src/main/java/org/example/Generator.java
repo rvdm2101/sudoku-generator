@@ -23,14 +23,19 @@ public class Generator {
      */
     private List<List<Number>> sudokuGrid;
 
+    private enum Orientation {
+        HORIZONTAL,
+        VERTICAL
+    }
+
     /**
      * Create a sudoku tile. All positions are filled with the value 'NULL'.
      * The array represents a sudoku 3x3 tile
      */
-    private List<Number> generateSudokTile() {
+    private List<Number> generateSudokTile(Integer... defaultValues) {
         List<Number> tile = new ArrayList<Number>();
         for (int cellIndex = 0; cellIndex <= 8; cellIndex++) {
-            tile.add(null);
+            tile.add(defaultValues.length > cellIndex ? defaultValues[cellIndex] : null);
         }
         return tile;
     }
@@ -39,28 +44,62 @@ public class Generator {
      * Create a sudoku grid with a 9 by 9 multidemential array. All array positions are filled with the value 'NULL'.
      * Each array represents a sudoku 3x3 tile
      */
-    private List<List<Number>> generateSudokuGrid() {
+    private List<List<Number>> generateSudokuGrid(Integer... defaultValues) {
         List<List<Number>> grid = new ArrayList<>();
         for (int tileIndex = 0; tileIndex <= 8; tileIndex++) {
-            grid.add(generateSudokTile());
+            grid.add(generateSudokTile(defaultValues));
         }
         return grid;
     }
 
-    private List<List<Number>> findAvailableTileArrangements(
-        List<List<Number>> tilesHorizontaly,
-        List<List<Number>> tilesVerticaly
-    ) {
-        List<Number> availableTileArrangements = generateSudokTile();
-        for (int index = 0; index < tilesHorizontaly.size(); index++) {
-        }
-
-        return null;
+    private Integer getRowIndex(Integer cellIndex) {
+        // Determine in which row the cellIndex will be placed
+        int rowIndex = (int) Math.floor(cellIndex / TilesPerRow);
+        // rowIndex 0 > tiles 0,1,2
+        // rowIndex 1 > tiles 3,4,5
+        // rowIndex 2 > tiles 6,7,8
+        return rowIndex;
     }
 
-    private enum Orientation {
-        HORIZONTAL,
-        VERTICAL
+    private List<Number> getNumbersFromRowIndex(Integer rowIndex, List<Number> tile) {
+        int firstTileIndex = rowIndex * TilesPerRow;
+        return Arrays.asList(tile.get(firstTileIndex), tile.get(firstTileIndex + 1), tile.get(firstTileIndex + 2));
+    }
+
+    private void removeNumbersFromAvailableTileArrangements(
+        Integer rowIndex,
+        List<Number> numbersToRemove,
+        List<List<Number>> AvailableTileArrangements
+    ) {
+        int firstTileIndex = rowIndex * TilesPerRow;
+        int[] indexes = {firstTileIndex, firstTileIndex + 1, firstTileIndex + 2};
+
+        // Get the filled in tiles in that row
+        for (int index : indexes) {
+            AvailableTileArrangements.get(index).removeAll(numbersToRemove);
+        }
+    }
+
+    private List<List<Number>> findAvailableTileArrangements(
+        List<List<Number>> horizontalTiles,
+        List<List<Number>> verticalTiles
+    ) {
+        // Generate a prefilled tile
+        List<List<Number>> availableTileArrangements = generateSudokuGrid(1,2,3,4,5,6,7,8,9);
+        // Remove all the numbers already used in other tiles next to this tile
+        for (int index = 0; index < horizontalTiles.size(); index++) {
+            for (int rowIndex = 0; rowIndex <= 2; rowIndex++) {
+                removeNumbersFromAvailableTileArrangements(
+                    rowIndex,
+                    getNumbersFromRowIndex(rowIndex, horizontalTiles.get(index)),
+                    availableTileArrangements
+                );
+            }
+        }
+
+        // TODO: Remove all the numbers already used in other tiles above or below this tile
+
+        return null;
     }
 
     /**
@@ -76,10 +115,7 @@ public class Generator {
         List<List<Number>> existingTiles = new ArrayList<>();
         if (orientation == Orientation.HORIZONTAL) {
             // Determine in which row the currentTileIndex will be placed
-            int rowIndex = (int) Math.floor(currentTileIndex / TilesPerRow);
-            // rowIndex 0 > tiles 0,1,2
-            // rowIndex 1 > tiles 3,4,5
-            // rowIndex 2 > tiles 6,7,8
+            int rowIndex = getRowIndex(currentTileIndex);
             
             // Get the other tiles in that row
             int firstTileIndex = rowIndex * TilesPerRow;
