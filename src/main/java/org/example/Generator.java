@@ -177,6 +177,22 @@ public class Generator {
         return existingTiles;
     }
 
+    private Number getLeastRepresentedNumber(List<Number> representedNumbers, List<List<Number>> dataSet) {
+        // List<Pair<Number, Number>> pairs = Arrays.
+        return 0;
+    }
+
+    private List<Number> getNewTileArrangement(List<List<Number>> availableTileArrangements) {
+        System.out.println(availableTileArrangements);
+        List<Number> newTileArragement = new ArrayList<>();
+        for (int tileIndex = 0; tileIndex <= 8; tileIndex++) {
+            // availableTileArrangements.get(tileIndex)
+            System.out.println(availableTileArrangements.get(tileIndex));
+        }
+
+        return newTileArragement;
+    }
+
     private List<Number> getTileArrangement(int tileIndex, List<List<Number>> sudokuGrid) {
         // Create the first tile of the sudoku grid
         if (tileIndex == 0) {
@@ -191,7 +207,8 @@ public class Generator {
         List<List<Number>> horizontalTiles = getExistingTiles(tileIndex, sudokuGrid, Orientation.HORIZONTAL);
         List<List<Number>> verticalTiles = getExistingTiles(tileIndex, sudokuGrid, Orientation.VERTICAL);
 
-        List<List<Number>> availableTileArrangement = findAvailableTileArrangements(horizontalTiles, verticalTiles);
+        List<List<Number>> availableTileArrangements = findAvailableTileArrangements(horizontalTiles, verticalTiles);
+        List<Number> tileArrangement = getNewTileArrangement(availableTileArrangements);
         // if (availableTileArrangement == null) {
         // }
         // return availableTileArrangement;
