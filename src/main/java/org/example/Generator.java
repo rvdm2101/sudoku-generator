@@ -2,8 +2,11 @@ package org.example;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class Generator {
     private static String HorizontalDivider = "|";
@@ -178,16 +181,36 @@ public class Generator {
     }
 
     private Number getLeastRepresentedNumber(List<Number> representedNumbers, List<List<Number>> dataSet) {
-        // List<Pair<Number, Number>> pairs = Arrays.
-        return 0;
+        Map<Number, Integer> pairsMap = new LinkedHashMap<>();
+
+        for (List<Number> data : dataSet) {
+            for (Number representedNumber : representedNumbers) {
+                if (data.contains(representedNumber)) {
+                    int amount = pairsMap.getOrDefault(representedNumber, 0);
+                    pairsMap.put(representedNumber, amount + 1);
+                }
+            }
+        }
+
+        Optional<Map.Entry<Number, Integer>> lowest = pairsMap.entrySet()
+            .stream()
+            .sorted(Map.Entry.comparingByValue((entry1, entry2) -> Integer.compare(entry1, entry2)))
+            .findFirst();
+        return lowest.isPresent() ? lowest.get().getKey() : null;
+    }
+
+    private void removeNumberFromDataSet(Number numberToRemove, List<List<Number>> dataSet) {
+        for (List<Number> data : dataSet) {
+            data.remove(numberToRemove);
+        }
     }
 
     private List<Number> getNewTileArrangement(List<List<Number>> availableTileArrangements) {
-        System.out.println(availableTileArrangements);
         List<Number> newTileArragement = new ArrayList<>();
         for (int tileIndex = 0; tileIndex <= 8; tileIndex++) {
-            // availableTileArrangements.get(tileIndex)
-            System.out.println(availableTileArrangements.get(tileIndex));
+            Number leastRepresentedNumber = getLeastRepresentedNumber(availableTileArrangements.get(tileIndex), availableTileArrangements);
+            newTileArragement.add(tileIndex, leastRepresentedNumber);
+            removeNumberFromDataSet(leastRepresentedNumber, availableTileArrangements);
         }
 
         return newTileArragement;
@@ -208,12 +231,13 @@ public class Generator {
         List<List<Number>> verticalTiles = getExistingTiles(tileIndex, sudokuGrid, Orientation.VERTICAL);
 
         List<List<Number>> availableTileArrangements = findAvailableTileArrangements(horizontalTiles, verticalTiles);
-        List<Number> tileArrangement = getNewTileArrangement(availableTileArrangements);
+        return getNewTileArrangement(availableTileArrangements);
+
         // if (availableTileArrangement == null) {
         // }
         // return availableTileArrangement;
         // Something went wrong, return empty sudoku tile
-        return new LinkedList<Number>(Arrays.asList(null,null,null,null,null,null,null,null,null));
+        // return new LinkedList<Number>(Arrays.asList(null,null,null,null,null,null,null,null,null));
     }
 
     public void generateSudoku() {
