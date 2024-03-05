@@ -180,10 +180,12 @@ public class Generator {
         return existingTiles;
     }
 
-    private Number getLeastRepresentedNumber(List<Number> representedNumbers, List<List<Number>> dataSet) {
+    private Number getLeastRepresentedNumber(Integer currentIndex, List<List<Number>> dataSet) {
+        List<Number> representedNumbers = dataSet.get(currentIndex);
         Map<Number, Integer> pairsMap = new LinkedHashMap<>();
 
-        for (List<Number> data : dataSet) {
+        for (int tileIndex = currentIndex; tileIndex < dataSet.size(); tileIndex++) {
+            List<Number> data = dataSet.get(tileIndex);
             for (Number representedNumber : representedNumbers) {
                 if (data.contains(representedNumber)) {
                     int amount = pairsMap.getOrDefault(representedNumber, 0);
@@ -196,7 +198,10 @@ public class Generator {
             .stream()
             .sorted(Map.Entry.comparingByValue((entry1, entry2) -> Integer.compare(entry1, entry2)))
             .findFirst();
-        return lowest.isPresent() ? lowest.get().getKey() : null;
+        System.out.println(pairsMap.entrySet());
+        Number newNumber = lowest.isPresent() ? lowest.get().getKey() : null;
+        System.out.println(newNumber);
+        return newNumber;
     }
 
     private void removeNumberFromDataSet(Number numberToRemove, List<List<Number>> dataSet) {
@@ -207,11 +212,13 @@ public class Generator {
 
     private List<Number> getNewTileArrangement(List<List<Number>> availableTileArrangements) {
         List<Number> newTileArragement = new ArrayList<>();
+        System.out.println(availableTileArrangements);
         for (int tileIndex = 0; tileIndex <= 8; tileIndex++) {
-            Number leastRepresentedNumber = getLeastRepresentedNumber(availableTileArrangements.get(tileIndex), availableTileArrangements);
+            Number leastRepresentedNumber = getLeastRepresentedNumber(tileIndex, availableTileArrangements);
             newTileArragement.add(tileIndex, leastRepresentedNumber);
             removeNumberFromDataSet(leastRepresentedNumber, availableTileArrangements);
         }
+        System.out.println("");
 
         return newTileArragement;
     }
