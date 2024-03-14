@@ -2,11 +2,13 @@ package org.example;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 public class Generator {
     private static String HorizontalDivider = "|";
@@ -198,9 +200,9 @@ public class Generator {
             .stream()
             .sorted(Map.Entry.comparingByValue((entry1, entry2) -> Integer.compare(entry1, entry2)))
             .findFirst();
-        System.out.println(pairsMap.entrySet());
+        // System.out.println(pairsMap.entrySet());
         Number newNumber = lowest.isPresent() ? lowest.get().getKey() : null;
-        System.out.println(newNumber);
+        // System.out.println(newNumber);
         return newNumber;
     }
 
@@ -211,11 +213,24 @@ public class Generator {
     }
 
     private List<Number> getNewTileArrangement(List<List<Number>> availableTileArrangements) {
-        List<Number> newTileArragement = new ArrayList<>();
+        List<Number> newTileArragement = Arrays.asList(null, null, null, null, null, null, null, null, null);
         System.out.println(availableTileArrangements);
+
+        // Pre-fill all tile postions that only have 1 option
         for (int tileIndex = 0; tileIndex <= 8; tileIndex++) {
+            List<Number> availableTileArrangement = availableTileArrangements.get(tileIndex);
+            if (availableTileArrangement.size() == 1) {
+                newTileArragement.set(tileIndex, availableTileArrangement.get(0));
+                removeNumberFromDataSet(availableTileArrangement.get(0), availableTileArrangements);
+            }
+        }
+
+        for (int tileIndex = 0; tileIndex <= 8; tileIndex++) {
+            if (newTileArragement.get(tileIndex) != null) {
+                continue;
+            }
             Number leastRepresentedNumber = getLeastRepresentedNumber(tileIndex, availableTileArrangements);
-            newTileArragement.add(tileIndex, leastRepresentedNumber);
+            newTileArragement.set(tileIndex, leastRepresentedNumber);
             removeNumberFromDataSet(leastRepresentedNumber, availableTileArrangements);
         }
         System.out.println("");
@@ -227,8 +242,8 @@ public class Generator {
         // Create the first tile of the sudoku grid
         if (tileIndex == 0) {
             List<Number> newTile = new LinkedList<Number>(Arrays.asList(1,2,3,4,5,6,7,8,9));
-            // TODO: Add the following line, to make the first tile in random order
-            // Collections.shuffle(newTile);
+            // TODO: Remove seed to make it actually random
+            Collections.shuffle(newTile, new Random(123));
             return newTile;
         }
 
