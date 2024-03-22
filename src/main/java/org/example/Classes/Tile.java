@@ -26,7 +26,23 @@ public class Tile {
         values = tileValues;
     }
 
+    public Tile() {
+        this(new ArrayList<>());
+    }
+
     public List<Integer> getValues() {
         return values;
+    }
+
+    public List<Integer> getValuesByRow(Integer rowNumber) {
+        int firstTileIndex = rowNumber * 3;
+        int[] indexes = {firstTileIndex, firstTileIndex + 1, firstTileIndex + 2};
+        List<Integer> valuesOfThisRow = new ArrayList<>();
+
+        for (int index : indexes) {
+            valuesOfThisRow.add(values.get(index));
+        }
+
+        return valuesOfThisRow;
     }
 }
